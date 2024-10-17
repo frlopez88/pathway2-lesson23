@@ -181,25 +181,33 @@ const getAllPosts = async () => {
         }
 
 
-        layOut += `<div class="card mb-3">
+        layOut += `<div class="card mb-3 mx-auto" style="width: 300px">
 
-                <div class="card-body">
+                <div class="card-header">
                     <h5 class="card-title">${x.name}</h5>
+                </div>
+                <div class="card-body mx-auto">
                     <p class="card-text">${x.description}</p>
                 </div>
 
-                <div class="card-fotter row">
+                <div class="card-fotter row mx-2">
 
-                    <div class="col text-center">
-                        <button class="btn btn-danger mb-2" onclick="showLikesModal(${x.id})">${likeCounter} Likes</button>
+                    <div class="col">
+                        <button class="btn btn-danger mb-2" onclick="showLikesModal(${x.id})">${likeCounter} 
+                        <i class="fas fa-heart"></i>
+                        </button>
                     </div>
 
                     <div class="col">
-                        <button onclick="showCommentsModal(${x.id})" class="btn btn-success mb-2">${commentCounter} Comments</button>
+                        <button onclick="showCommentsModal(${x.id})" class="btn btn-success mb-2">${commentCounter} 
+                        <i class="fas fa-comment"></i>
+                        </button>
                     </div>
 
                      <div class="col">
-                        <button onclick="createLike(${x.id})" class="btn btn-danger mb-2">:)</button>
+                        <button onclick="createLike(${x.id})" class="btn btn-danger mb-2">
+                        <i class="fas fa-heart"></i>
+                        </button>
                     </div>
 
                 </div>
