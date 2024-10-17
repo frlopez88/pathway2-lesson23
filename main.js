@@ -191,11 +191,11 @@ const getAllPosts = async () => {
                 <div class="card-fotter row">
 
                     <div class="col text-center">
-                        <button class="btn btn-danger mb-2" onclick="showLikesModal(${x.id})">${likeCounter} likes</button>
+                        <button class="btn btn-danger mb-2" onclick="showLikesModal(${x.id})">${likeCounter} Likes</button>
                     </div>
 
                     <div class="col">
-                        <button onclick="showCommentsModal(${x.id})" class="btn btn-success mb-2">${commentCounter}Comments</button>
+                        <button onclick="showCommentsModal(${x.id})" class="btn btn-success mb-2">${commentCounter} Comments</button>
                     </div>
 
                      <div class="col">
