@@ -170,10 +170,16 @@ const getAllPosts = async () => {
     data.forEach((x) => {
 
         let likeCounter = 0
+        let commentCounter = 0
 
         if (x.likes) {
             likeCounter = x.likes.length
         }
+
+        if(x.comments){
+            commentCounter = x.comments.length
+        }
+
 
         layOut += `<div class="card mb-3">
 
@@ -189,7 +195,7 @@ const getAllPosts = async () => {
                     </div>
 
                     <div class="col">
-                        <button onclick="showCommentsModal(${x.id})" class="btn btn-success mb-2">Comments</button>
+                        <button onclick="showCommentsModal(${x.id})" class="btn btn-success mb-2">${commentCounter}Comments</button>
                     </div>
 
                      <div class="col">
