@@ -58,6 +58,8 @@ const showCommentsModal = async (id) => {
     commentModal = new bootstrap.Modal(document.getElementById("commentModal"))
     commentModal.show()
 
+    inputIdComment.value = id
+
     let url = `${baseURL}?id=eq.${id}`
 
     let response = await fetch(url, {
@@ -222,7 +224,6 @@ const createLike = async (id) => {
 
         let bodyLikes = await responseLikes.json()
         let post = bodyLikes[0]
-        console.log(post)
 
         if (!post.likes.includes(username)) {
             post.likes.push(username)
@@ -239,14 +240,78 @@ const createLike = async (id) => {
 
             if (response.ok) {
                 getAllPosts()
+                
             } else {
                 console.log("Like wasn´t added")
             }
 
 
         }
-    }else{
-        console.log(`Post with id: ${id} is not getting returned from supabase`) 
+    } else {
+        console.log(`Post with id: ${id} is not getting returned from supabase`)
+    }
+
+}
+
+
+const createComment2 = async () => {
+
+  
+
+    let id = inputIdComment.value
+    let name = window.localStorage.getItem("username")
+    let comment = inputComment.value
+    let today = new Date()
+    let date = `${today.getDate()}/${today.getMonth()+1}/${today.getFullYear()}`
+    
+    let commentObject = {
+        name, 
+        comment, 
+        date
+    }
+
+
+    let url = `${baseURL}?id=eq.${id}`
+
+    let responseComments = await fetch(url, {
+        method: 'GET',
+        headers: {
+            'apikey': token,
+            'Authorization': token
+        }
+    })
+
+    if (responseComments.ok) {
+
+        let bodyComments = await responseComments.json()
+        let post = bodyComments[0]
+
+
+        post.comments.push(commentObject)
+
+        let response = await fetch(url, {
+            method: 'PATCH',
+            headers: {
+                'apikey': token,
+                'Authorization': token,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(post)
+        })
+
+        if (response.ok) {
+            getAllPosts() 
+            commentModal.hide()
+            showCommentsModal(id)
+            inputComment.value = ""
+        } else {
+            console.log("Comment wasn´t added")
+        }
+
+
+
+    } else {
+        console.log(`Post with id: ${id} is not getting returned from supabase`)
     }
 
 }
