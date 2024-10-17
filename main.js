@@ -1,24 +1,98 @@
 let token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFuZnppemFlc2RmZGlqeWdya2toIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjgzNDczNzIsImV4cCI6MjA0MzkyMzM3Mn0.llAqlwkL2QvoEaHCq9b9yf0Thp3F31xlA2f-QGx0lGk"
 let baseURL = "https://qnfzizaesdfdijygrkkh.supabase.co/rest/v1/posts"
 
+let modalLikes
+let commentModal
+let createTweet
 
-const showLikesModal = () => {
+const showLikesModal = async (id) => {
 
-    let modalLikes = new bootstrap.Modal(document.getElementById("likesModal"))
+    modalLikes = new bootstrap.Modal(document.getElementById("likesModal"))
     modalLikes.show()
+
+    let url = `${baseURL}?id=eq.${id}`
+
+    let response = await fetch(url, {
+        method: 'GET',
+        headers: {
+            'apikey': token,
+            'Authorization': token
+        }
+    })
+
+    if (response.ok) {
+
+        let body = await response.json()
+
+
+
+        let likesdata = body[0].likes
+        let comments = body[0].comments
+
+        // Rendering the likes
+        let likeLayOut = ``
+
+        for (let i = 0; i < likesdata.length; i++) {
+            likeLayOut += `<li class="list-group-item">${likesdata[i]}</li> `
+        }
+        reportLikes.innerHTML = likeLayOut
+
+        // Render the Comments
+
+        let commentLayOut = ``
+
+        for (let i = 0; i < comments.length; i++) {
+            commentLayOut += `<li class="list-group-item">${comments[i].name}: ${comments[i].comment} </li> `
+        }
+
+        reportComments.innerHTML = commentLayOut
+
+    } else {
+        reportLikes.innerHTML = `Something went wrong!`
+    }
 
 }
 
-const showCommentsModal = () => {
+const showCommentsModal = async (id) => {
 
-    let commentModal = new bootstrap.Modal(document.getElementById("commentModal"))
+    commentModal = new bootstrap.Modal(document.getElementById("commentModal"))
     commentModal.show()
 
+    let url = `${baseURL}?id=eq.${id}`
+
+    let response = await fetch(url, {
+        method: 'GET',
+        headers: {
+            'apikey': token,
+            'Authorization': token
+        }
+    })
+
+    if (response.ok) {
+
+        let body = await response.json()
+
+        let comments = body[0].comments
+
+
+        // Render the Comments
+
+        let commentLayOut = ``
+
+        for (let i = 0; i < comments.length; i++) {
+            commentLayOut += `<li class="list-group-item">${comments[i].name}: ${comments[i].comment} </li> `
+        }
+
+        reportComments.innerHTML = commentLayOut
+
+    } else {
+        reportComments.innerHTML = `Something went wrong!`
+    }
 }
 
 const showTweetModal = () => {
 
-    let createTweet = new bootstrap.Modal(document.getElementById("createTweet"))
+    createTweet = new bootstrap.Modal(document.getElementById("createTweet"))
     createTweet.show()
 
 
@@ -44,10 +118,14 @@ const creatPost = async () => {
 
     let description = inputTweet.value
     let name = window.localStorage.getItem("username")
+    let likes = []
+    let comments = []
 
     let jsonBody = {
         description,
-        name
+        name,
+        likes,
+        comments
     }
 
     let response = await fetch(baseURL, {
@@ -62,33 +140,36 @@ const creatPost = async () => {
 
     if (response.ok) {
         console.log("Tweet Created")
-    }else{
-        let body  = await response.json()
+        createTweet.hide()
+        getAllPosts()
+    } else {
+        let body = await response.json()
         console.log(body)
     }
 
 }
 
 
-const getAllPosts = async ()=>{
+const getAllPosts = async () => {
 
-    let response = await fetch(baseURL, {
-        method: 'GET', 
-        headers : {
-            'apikey' : token, 
+    let url = `${baseURL}?order=id.desc`
+
+    let response = await fetch(url, {
+        method: 'GET',
+        headers: {
+            'apikey': token,
             'Authorization': token
         }
     })
 
     let data = await response.json()
-    console.log(data)
     let layOut = ``
 
-    data.forEach( (x)=>{
+    data.forEach((x) => {
 
         let likeCounter = 0
 
-        if (x.likes){
+        if (x.likes) {
             likeCounter = x.likes.length
         }
 
@@ -102,18 +183,70 @@ const getAllPosts = async ()=>{
                 <div class="card-fotter row">
 
                     <div class="col text-center">
-                        <button class="btn btn-danger mb-2" onclick="showLikesModal()">${likeCounter} likes</button>
+                        <button class="btn btn-danger mb-2" onclick="showLikesModal(${x.id})">${likeCounter} likes</button>
                     </div>
 
                     <div class="col">
-                        <button onclick="showCommentsModal()" class="btn btn-success mb-2">Comments</button>
+                        <button onclick="showCommentsModal(${x.id})" class="btn btn-success mb-2">Comments</button>
+                    </div>
+
+                     <div class="col">
+                        <button onclick="createLike(${x.id})" class="btn btn-danger mb-2">:)</button>
                     </div>
 
                 </div>
             </div>
 `
-    } )
+    })
 
     wall.innerHTML = layOut
+
+}
+
+
+const createLike = async (id) => {
+
+    let username = window.localStorage.getItem("username")
+
+    let url = `${baseURL}?id=eq.${id}`
+
+    let responseLikes = await fetch(url, {
+        method: 'GET',
+        headers: {
+            'apikey': token,
+            'Authorization': token
+        }
+    })
+
+    if (responseLikes.ok) {
+
+        let bodyLikes = await responseLikes.json()
+        let post = bodyLikes[0]
+        console.log(post)
+
+        if (!post.likes.includes(username)) {
+            post.likes.push(username)
+
+            let response = await fetch(url, {
+                method: 'PATCH',
+                headers: {
+                    'apikey': token,
+                    'Authorization': token,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(post)
+            })
+
+            if (response.ok) {
+                getAllPosts()
+            } else {
+                console.log("Like wasn´t added")
+            }
+
+
+        }
+    }else{
+        console.log(`Post with id: ${id} is not getting returned from supabase`) 
+    }
 
 }
